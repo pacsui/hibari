@@ -9,13 +9,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 	log "github.com/charmbracelet/log"
 	"github.com/pacsui/threadsinchannel/handlers"
-	yaml "gopkg.in/yaml.v3"
 )
 
 // Flags
 var (
-	DiscordConfigValues handlers.BotConfig
-	Debug               bool
+	Debug bool
 )
 
 func init() {
@@ -26,34 +24,16 @@ func init() {
 		log.SetLevel(log.DebugLevel)
 		log.Debug("Running in Debug!")
 	}
-
-	configBytes, err := os.ReadFile("config.yaml")
-	log.Debug(string(configBytes))
+	dConVal, err := handlers.ReadConfigFile("config.yaml")
 	if err != nil {
-		log.Warn("Config file not found config.yaml")
-		fl, err := os.Create("config.yaml")
-		if err != nil {
-			log.Errorf("unable to create file : %s", err.Error())
-		}
-		emptyBotConfig := handlers.BotConfig{}
-		yamlDefault, err := yaml.Marshal(emptyBotConfig)
-
-		_, err = fl.WriteString(string(yamlDefault))
-		if err != nil {
-			log.Warn("Unable to create default config file : %s", err.Error())
-		}
-	}
-	err = yaml.Unmarshal(configBytes, &DiscordConfigValues)
-	if err != nil {
-		log.Error("unable to unmarshal!? : %s", err.Error())
+		log.Error(err)
 		return
 	}
-	log.Debug(DiscordConfigValues)
-
+	handlers.DiscordBotConfigValues = dConVal
 }
 
 func main() {
-	s, _ := discordgo.New("Bot " + DiscordConfigValues.Auth.Token)
+	s, _ := discordgo.New("Bot " + handlers.DiscordBotConfigValues.DiscordConfig.Auth.Token)
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		fmt.Println("Bot running")
 	})

@@ -33,10 +33,10 @@ func (m *MsgChannelKey) GetKey() string {
 
 func init() {
 	redisClient = redis.NewClient(&redis.Options{
-		Addr: "redis-13330.crce206.ap-south-1-1.ec2.redns.redis-cloud.com:13330",
+		Addr: DiscordBotConfigValues.Redis.Endpoint,
 		// Username: "default",
-		Password: "vYKI3yw5rrg7bUknO2Mze1M7kxgWWmJ0",
-		DB:       0,
+		Password: DiscordBotConfigValues.Redis.Password,
+		DB:       DiscordBotConfigValues.Redis.DbNum,
 	})
 }
 

@@ -1,5 +1,9 @@
 package handlers
 
+var (
+	DiscordBotConfigValues BotConfig
+)
+
 type AuthConfig struct {
 	Token string `yaml:"token"`
 }
@@ -21,6 +25,7 @@ type DiscordConfig struct {
 	GuildIDs []string       `yaml:"guildIDs"`
 	Auth     AuthConfig     `yaml:"auth"`
 	Channels ChannelsConfig `yaml:"channels"`
+	Redis    RedisConfig    `yaml:"redis"`
 }
 
 type RedisConfig struct {
