@@ -65,10 +65,7 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 	ChanID, MsgID := split_key[2], split_key[1]
 	getMessage, err := s.ChannelMessage(ChanID, MsgID)
 	chanName, err := s.Channel(getMessage.ChannelID)
-	msg := ""
-	if err == nil {
-		msg = fmt.Sprintf(" in #%s", chanName.Name)
-	}
+
 	if err != nil {
 		log.Errorf("MessageID : %s , ChannelID : %s\nErr: %s", ChanID, MsgID, err.Error())
 		return
@@ -77,7 +74,7 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 	toEmbed := discordgo.MessageEmbed{
 		URL: "https://discord.com/channels/" + GUILD_ID + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    getMessage.Author.GlobalName + msg,
+			Name:    getMessage.Author.GlobalName,
 			IconURL: getMessage.Author.AvatarURL(""),
 			URL:     "https://discord.com/channels/" + GUILD_ID + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		},
@@ -89,13 +86,23 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 			URL: getMessage.Attachments[0].URL,
 		}
 	}
-
-	s.ChannelMessageSendEmbed("1423710458606780599", &toEmbed)
+	s.ChannelMessageSendComplex(
+		DiscordBotConfigValues.Channels.StarBoardChannel,
+		&discordgo.MessageSend{
+			Content: fmt.Sprintf(
+				"『 x%s 』 %s in %s",
+				redisClient.Get(key),
+				getMessage.Author.Mention(),
+				chanName.Mention(),
+			),
+			Embed: &toEmbed,
+		},
+	)
 }
 
 func ScheduleCrossPost(key string, s *discordgo.Session) {
 	log.Debugf("Crosspost Scheduled! for key %s", key)
-	redisClient.Set(key, string(DONE_VAL), 48*time.Hour) // set big num?
+	redisClient.Set(key, string(DONE_VAL), 32*time.Hour) // set big num?
 	go SendMessageOnKey(key, s)
 }
 
@@ -118,7 +125,7 @@ func HandleStarBoardAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		m.ChannelID,
 		m.MessageID,
 	}
-	if m.Emoji.Name == "⭐" || m.Emoji.Name == "✨" {
+	if m.Emoji.Name == "⭐" || m.Emoji.Name == "✨" || m.Emoji.Name == "❤️" {
 		log.Debugf("Incr : %s", rKey.GetKey())
 		if val, _ := strconv.Atoi(redisClient.Get(rKey.GetKey()).Val()); val <= THRESHOLD {
 			redisClient.Incr("todo:" + rKey.GetKey())

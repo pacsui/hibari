@@ -8,8 +8,6 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-const PIC_POINT_CHANNEL_ID string = "1399658766403899454"
-
 func IsTheyAdmin(s *discordgo.Session, m *discordgo.MessageCreate) bool {
 	return false
 }
@@ -26,7 +24,7 @@ func CreateThreadForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	if ch, err := s.State.Channel(m.ChannelID); err != nil || !ch.IsThread() {
 		thread, err := s.MessageThreadStartComplex(m.ChannelID, m.ID, &discordgo.ThreadStart{
-			Name:      threadName[:min(10, len(threadName)-1)],
+			Name:      threadName[:min(20, len(threadName)-1)],
 			Invitable: true,
 		})
 		if err != nil {
@@ -39,7 +37,7 @@ func CreateThreadForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func HandleMessageInThreads(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID || m.ChannelID != PIC_POINT_CHANNEL_ID {
+	if m.Author.ID == s.State.User.ID || m.ChannelID != DiscordBotConfigValues.Channels.PictureChannel {
 		return
 	}
 	chanName, _ := s.Channel(m.ChannelID)
@@ -62,10 +60,7 @@ func HandleMessageInThreads(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Reference: m.Reference(),
 			Flags:     discordgo.MessageFlags(discordgo.MessageFlagsEphemeral),
 		})
-		// if m.ReferencedMessage.Thread != "" && len(m.ReferencedMessage.Attachments) > 0 {
-		// 	CreateThreadForMessage(s, m)
-		// 	go s.ChannelMessageSend(m.ReferencedMessage.Thread.ID, fmt.Sprintf("**%s** : %s", m.Author.DisplayName(), m.Content))
-		// }
+
 		defer s.ChannelMessageDelete(m.ChannelID, m.ID)
 		defer s.ChannelMessageDelete(m_snd.ChannelID, m_snd.ID)
 		modLogError(fmt.Sprintf(

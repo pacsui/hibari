@@ -9,7 +9,8 @@ type AuthConfig struct {
 }
 
 type ChannelsConfig struct {
-	PictureChannel string `yaml:"picture-channel"`
+	PictureChannel   string `yaml:"picture-channel"`
+	StarBoardChannel string `yaml:"starboard-channel"`
 }
 
 type StarConfig struct {

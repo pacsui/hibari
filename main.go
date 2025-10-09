@@ -45,6 +45,14 @@ func init() {
 			Name:     "starboard del",
 			Function: handlers.HandleStarBoardDel,
 		},
+		// handlers.Handler{
+		// 	Name:     "avatar handler",
+		// 	Function: handlers.HandleAvatarEmbedReply,
+		// },
+		// handlers.Handler{
+		// 	Name:     "impersonation handler",
+		// 	Function: handlers.HandleImpersonation,
+		// },
 	}
 
 }
@@ -55,26 +63,12 @@ func main() {
 		log.Infof("Bot running as %s", s.State.User.DisplayName())
 	})
 
-	//TODO: add []interface{}
-
 	for _, handler := range HandlerList {
 		s.AddHandler(handler.Function)
 		log.Infof("Added Handler : %s", handler.Name)
 	}
-
-	// s.AddHandler(handlers.HandleStarBoardAdd)
-	// s.AddHandler(handlers.HandleMessageInThreads)
-	// s.AddHandler(handlers.HandleStarBoardDel)
-
 	done := make(chan struct{})
 	go handlers.PollingServiceToCrossPost(done, s)
-
-	// go func(s *discordgo.Session) {
-	// 	for i := range handlers.QUEUE {
-	// 		log.Info(i)
-	// 	}
-	// }(s)
-
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
 
 	err := s.Open()
