@@ -8,11 +8,6 @@ type AuthConfig struct {
 	Token string `yaml:"token"`
 }
 
-type ChannelsConfig struct {
-	PictureChannel   string `yaml:"picture-channel"`
-	StarBoardChannel string `yaml:"starboard-channel"`
-}
-
 type StarConfig struct {
 	Threshold int `yaml:"threshold"`
 	Done      int `yaml:"done"`
@@ -23,10 +18,11 @@ type SettingsConfig struct {
 }
 
 type DiscordConfig struct {
-	GuildIDs []string       `yaml:"guildIDs"`
-	Auth     AuthConfig     `yaml:"auth"`
-	Channels ChannelsConfig `yaml:"channels"`
-	Redis    RedisConfig    `yaml:"redis"`
+	GuildIDs         []string    `yaml:"guildIDs"`
+	Auth             AuthConfig  `yaml:"auth"`
+	Channels         []string    `yaml:"channels"`
+	StarBoardChannel string      `yaml:"starboard-channel"`
+	Redis            RedisConfig `yaml:"redis"`
 }
 
 type RedisConfig struct {

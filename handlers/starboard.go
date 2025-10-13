@@ -13,10 +13,6 @@ import (
 
 var redisClient *redis.Client
 
-const THRESHOLD int = 5
-const DONE_VAL int = 1011011011
-const GUILD_ID string = "1397965284765077504"
-
 type MsgChannelKey struct {
 	msgID     string
 	channelID string
@@ -54,7 +50,7 @@ func RedisIter(s *discordgo.Session) {
 	for _, key := range keys {
 		keyVal := redisClient.Get(key).Val()
 		log.Debugf("Redis: %s -> %s", key, keyVal)
-		if val, _ := strconv.Atoi(keyVal); val >= THRESHOLD && val != DONE_VAL {
+		if val, _ := strconv.Atoi(keyVal); val >= DiscordBotConfigValues.Star.Threshold && val != DiscordBotConfigValues.Redis.DoneVal {
 			ScheduleCrossPost(key, s)
 		}
 	}
@@ -64,19 +60,23 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 	split_key := strings.Split(key, ":")
 	ChanID, MsgID := split_key[2], split_key[1]
 	getMessage, err := s.ChannelMessage(ChanID, MsgID)
+	if err != nil {
+		Hlog(s, err.Error())
+		log.Debug(err.Error())
+	}
 	chanName, err := s.Channel(getMessage.ChannelID)
 
 	if err != nil {
-		log.Errorf("MessageID : %s , ChannelID : %s\nErr: %s", ChanID, MsgID, err.Error())
+		Hlog(s, fmt.Sprintf("MessageID : %s , ChannelID : %s\nErr: %s", ChanID, MsgID, err.Error()))
 		return
 	}
 
 	toEmbed := discordgo.MessageEmbed{
-		URL: "https://discord.com/channels/" + GUILD_ID + "/" + getMessage.ChannelID + "/" + getMessage.ID,
+		URL: "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    getMessage.Author.GlobalName,
 			IconURL: getMessage.Author.AvatarURL(""),
-			URL:     "https://discord.com/channels/" + GUILD_ID + "/" + getMessage.ChannelID + "/" + getMessage.ID,
+			URL:     "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		},
 		Description: getMessage.Content,
 	}
@@ -87,7 +87,7 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 		}
 	}
 	s.ChannelMessageSendComplex(
-		DiscordBotConfigValues.Channels.StarBoardChannel,
+		DiscordBotConfigValues.StarBoardChannel,
 		&discordgo.MessageSend{
 			Content: fmt.Sprintf(
 				"『 x%s 』 %s in %s",
@@ -102,7 +102,7 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 
 func ScheduleCrossPost(key string, s *discordgo.Session) {
 	log.Debugf("Crosspost Scheduled! for key %s", key)
-	redisClient.Set(key, string(DONE_VAL), 32*time.Hour) // set big num?
+	redisClient.Set(key, DiscordBotConfigValues.Redis.DoneVal, 32*time.Hour)
 	go SendMessageOnKey(key, s)
 }
 
@@ -127,7 +127,7 @@ func HandleStarBoardAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	}
 	if m.Emoji.Name == "⭐" || m.Emoji.Name == "✨" || m.Emoji.Name == "❤️" {
 		log.Debugf("Incr : %s", rKey.GetKey())
-		if val, _ := strconv.Atoi(redisClient.Get(rKey.GetKey()).Val()); val <= THRESHOLD {
+		if val, _ := strconv.Atoi(redisClient.Get(rKey.GetKey()).Val()); val <= DiscordBotConfigValues.Star.Threshold {
 			redisClient.Incr("todo:" + rKey.GetKey())
 		}
 
