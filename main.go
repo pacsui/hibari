@@ -45,6 +45,10 @@ func init() {
 			Name:     "starboard del",
 			Function: handlers.HandleStarBoardDel,
 		},
+		handlers.Handler{
+			Name:     "creativity chan handler",
+			Function: handlers.HandleMessageInCreativity,
+		},
 		// handlers.Handler{
 		// 	Name:     "avatar handler",
 		// 	Function: handlers.HandleAvatarEmbedReply,
