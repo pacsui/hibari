@@ -33,22 +33,22 @@ func init() {
 	handlers.DiscordBotConfigValues = dConVal
 
 	HandlerList = []handlers.Handler{
-		handlers.Handler{
+		{
 			Name:     "starboard handler",
 			Function: handlers.HandleStarBoardAdd,
 		},
-		handlers.Handler{
-			Name:     "msg thread handler",
-			Function: handlers.HandleMessageInThreads,
-		},
-		handlers.Handler{
+		{
 			Name:     "starboard del",
 			Function: handlers.HandleStarBoardDel,
 		},
-		handlers.Handler{
-			Name:     "creativity chan handler",
-			Function: handlers.HandleMessageInCreativity,
+		{
+			Name:     "thread creator",
+			Function: handlers.HandleMessageInChannelPool,
 		},
+		// handlers.Handler{
+		// 	Name:     "creativity chan handler",
+		// 	Function: handlers.HandleMessageInCreativity,
+		// },
 		// handlers.Handler{
 		// 	Name:     "avatar handler",
 		// 	Function: handlers.HandleAvatarEmbedReply,

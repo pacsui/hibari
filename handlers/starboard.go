@@ -60,10 +60,14 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 	split_key := strings.Split(key, ":")
 	ChanID, MsgID := split_key[2], split_key[1]
 	getMessage, err := s.ChannelMessage(ChanID, MsgID)
+	if err != nil {
+		Hlog(s, err.Error())
+		log.Debug(err.Error())
+	}
 	chanName, err := s.Channel(getMessage.ChannelID)
 
 	if err != nil {
-		log.Errorf("MessageID : %s , ChannelID : %s\nErr: %s", ChanID, MsgID, err.Error())
+		Hlog(s, fmt.Sprintf("MessageID : %s , ChannelID : %s\nErr: %s", ChanID, MsgID, err.Error()))
 		return
 	}
 
@@ -83,7 +87,7 @@ func SendMessageOnKey(key string, s *discordgo.Session) {
 		}
 	}
 	s.ChannelMessageSendComplex(
-		DiscordBotConfigValues.Channels.StarBoardChannel,
+		DiscordBotConfigValues.StarBoardChannel,
 		&discordgo.MessageSend{
 			Content: fmt.Sprintf(
 				"『 x%s 』 %s in %s",

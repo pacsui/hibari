@@ -5,12 +5,18 @@ import (
 	"math/rand"
 	"os"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
 	"gopkg.in/yaml.v3"
 )
 
 var threadRequests = []string{
 	"%s, we recommend using threads for new topics.",
+}
+
+func Hlog(s *discordgo.Session, content string) {
+	s.ChannelMessageSend("1427259484299857961", content)
+	log.Info(content)
 }
 
 func GetRandomThreadRequest(username string) string {
@@ -33,6 +39,9 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 		}
 		emptyBotConfig := BotConfig{}
 		yamlDefault, err := yaml.Marshal(emptyBotConfig)
+		if err != nil {
+			log.Warn("unable to write bot empty config?", err.Error())
+		}
 
 		_, err = fl.WriteString(string(yamlDefault))
 		if err != nil {
