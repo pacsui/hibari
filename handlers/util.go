@@ -14,6 +14,21 @@ var threadRequests = []string{
 	"%s, we recommend using threads for new topics.",
 }
 
+type ChanMsgKeyType struct {
+	ChanID string
+	MsgID  string
+}
+
+func ChanMsgKey(cID string, mID string) ChanMsgKeyType {
+	if len(mID) > 0 && len(cID) > 0 {
+		return ChanMsgKeyType{
+			ChanID: cID,
+			MsgID:  mID,
+		}
+	}
+	return ChanMsgKeyType{}
+}
+
 func Hlog(s *discordgo.Session, content string) {
 	s.ChannelMessageSend("1427259484299857961", content)
 	log.Info(content)
