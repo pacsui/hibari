@@ -10,7 +10,6 @@ type AuthConfig struct {
 
 type StarConfig struct {
 	Threshold int `yaml:"threshold"`
-	Done      int `yaml:"done"`
 }
 
 type SettingsConfig struct {
@@ -23,6 +22,7 @@ type DiscordConfig struct {
 	Channels         []string    `yaml:"channels"`
 	StarBoardChannel string      `yaml:"starboard-channel"`
 	Redis            RedisConfig `yaml:"redis"`
+	HelloReply       []string    `yaml:"hello-replies"`
 }
 
 type RedisConfig struct {

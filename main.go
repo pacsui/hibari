@@ -38,21 +38,13 @@ func init() {
 			Function: handlers.HandleStarBoardAdd,
 		},
 		{
-			Name:     "starboard del",
-			Function: handlers.HandleStarBoardDel,
-		},
-		{
 			Name:     "thread creator",
 			Function: handlers.HandleMessageInChannelPool,
 		},
-		// handlers.Handler{
-		// 	Name:     "creativity chan handler",
-		// 	Function: handlers.HandleMessageInCreativity,
-		// },
-		// handlers.Handler{
-		// 	Name:     "avatar handler",
-		// 	Function: handlers.HandleAvatarEmbedReply,
-		// },
+		handlers.Handler{
+			Name:     "old commands handler",
+			Function: handlers.OnMessageOldCommandHandler,
+		},
 		// handlers.Handler{
 		// 	Name:     "impersonation handler",
 		// 	Function: handlers.HandleImpersonation,
@@ -71,8 +63,8 @@ func main() {
 		s.AddHandler(handler.Function)
 		log.Infof("Added Handler : %s", handler.Name)
 	}
-	done := make(chan struct{})
-	go handlers.PollingServiceToCrossPost(done, s)
+	// done := make(chan struct{})
+	// go handlers.PollingServiceToCrossPost(done, s)
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
 
 	err := s.Open()
