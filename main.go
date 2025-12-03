@@ -33,22 +33,26 @@ func init() {
 	handlers.DiscordBotConfigValues = dConVal
 
 	HandlerList = []handlers.Handler{
-		{
-			Name:     "starboard handler",
-			Function: handlers.HandleStarBoardAdd,
-		},
-		{
-			Name:     "thread creator",
-			Function: handlers.HandleMessageInChannelPool,
-		},
-		handlers.Handler{
-			Name:     "old commands handler",
-			Function: handlers.OnMessageOldCommandHandler,
-		},
+		// {
+		// 	Name:     "starboard handler",
+		// 	Function: handlers.HandleStarBoardAdd,
+		// },
+		// {
+		// 	Name:     "thread creator",
+		// 	Function: handlers.HandleMessageInChannelPool,
+		// },
+		// handlers.Handler{
+		// 	Name:     "old commands handler",
+		// 	Function: handlers.OnMessageOldCommandHandler,
+		// },
 		// handlers.Handler{
 		// 	Name:     "impersonation handler",
 		// 	Function: handlers.HandleImpersonation,
 		// },
+		handlers.Handler{
+			Name:     "cap statboard",
+			Function: handlers.CapBoardHandler,
+		},
 	}
 
 }

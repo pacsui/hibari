@@ -24,6 +24,14 @@ func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate
 		log.Warnf("Self triggered? --> %s", m.ID)
 		return
 	}
+
+	for _, blockedChannel := range DiscordBotConfigValues.Channels {
+		if blockedChannel == m.ChannelID {
+			log.Warnf("Triggered in ThreadsOnlyChannel : %s", m.Content)
+			return
+		}
+	}
+
 	if strings.Contains(strings.ToLower(m.Content[:min(len(m.Content), 50)]), "hello") || AmIMentioned(s, m) {
 		reply := DiscordBotConfigValues.HelloReply[rand.Intn(len(DiscordBotConfigValues.HelloReply))]
 		s.ChannelMessageSend(m.ChannelID, reply)

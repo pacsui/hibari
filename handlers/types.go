@@ -17,12 +17,14 @@ type SettingsConfig struct {
 }
 
 type DiscordConfig struct {
-	GuildIDs         []string    `yaml:"guildIDs"`
-	Auth             AuthConfig  `yaml:"auth"`
-	Channels         []string    `yaml:"channels"`
-	StarBoardChannel string      `yaml:"starboard-channel"`
-	Redis            RedisConfig `yaml:"redis"`
-	HelloReply       []string    `yaml:"hello-replies"`
+	GuildIDs                  []string    `yaml:"guildIDs"`
+	Auth                      AuthConfig  `yaml:"auth"`
+	Channels                  []string    `yaml:"threads-filtered"`
+	AllowedURLPrefix          []string    `yaml:"allowed-urls-threads-filtered"`
+	StarBoardChannel          string      `yaml:"starboard-channel"`
+	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
+	Redis                     RedisConfig `yaml:"redis"`
+	HelloReply                []string    `yaml:"hello-replies"`
 }
 
 type RedisConfig struct {
