@@ -71,3 +71,7 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 	}
 	return BConfig, nil
 }
+
+func C(cmd_str string) string {
+	return DiscordBotConfigValues.CommandPrefix + cmd_str
+}

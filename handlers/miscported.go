@@ -41,21 +41,36 @@ func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate
 		go s.MessageReactionAdd(m.ChannelID, m.ID, "💀")
 	}
 
-	if !strings.HasPrefix(m.Content, ">>") {
+	if strings.Contains(strings.ToLower(m.Content[:min(len(m.Content), 50)]), "clanker") && rand.Intn(5) == 0 {
+		sadgeMoji := []string{
+			"psadge:1415778308490137730",
+			"🥺",
+			"😔",
+			"😭",
+			"🥀",
+		}
+		go s.MessageReactionAdd(m.ChannelID, m.ID, sadgeMoji[rand.Intn(len(sadgeMoji)-1)])
+	}
+
+	if !strings.HasPrefix(m.Content, C("")) {
 		return
 	}
 
 	switch {
-	case strings.HasPrefix(m.Content, ">>av"), strings.HasPrefix(m.Content, ">>avatar"):
+	case strings.HasPrefix(m.Content, C("av")), strings.HasPrefix(m.Content, ">>avatar"):
 		go HandleAvatarEmbedReply(s, m)
-	case strings.HasPrefix(m.Content, ">>sayas"):
+	case strings.HasPrefix(m.Content, C("sayas")):
 		HandleImpersonation(s, m)
+	case strings.HasPrefix(m.Content, C("mixins")):
+		// already handled
+		return
 	default:
 		log.Warn("Command not found!?")
 	}
 }
 
 func HandleImpersonation(s *discordgo.Session, m *discordgo.MessageCreate) {
+	go s.MessageReactionAdd(m.ChannelID, m.ID, "pno:1415778132463456258")
 	log.Warnf("Not Implemented!")
 }
 
@@ -75,7 +90,7 @@ func HandleAvatarEmbedReply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Image: &discordgo.MessageEmbedImage{
 			URL: WhoUser.AvatarURL("512"),
 		},
-		Color: 0x77FF77,
+		Color: 0x79AEA3,
 	}
 	// s.ChannelMessageSendEmbedReply(
 	// 	m.ChannelID,

@@ -17,6 +17,7 @@ type SettingsConfig struct {
 }
 
 type DiscordConfig struct {
+	CommandPrefix             string      `yaml:"cmd_prefix"`
 	GuildIDs                  []string    `yaml:"guildIDs"`
 	Auth                      AuthConfig  `yaml:"auth"`
 	Channels                  []string    `yaml:"threads-filtered"`
@@ -43,4 +44,5 @@ type BotConfig struct {
 type Handler struct {
 	Name     string
 	Function interface{}
+	File     string
 }
