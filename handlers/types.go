@@ -10,7 +10,6 @@ type AuthConfig struct {
 
 type StarConfig struct {
 	Threshold int `yaml:"threshold"`
-	Done      int `yaml:"done"`
 }
 
 type SettingsConfig struct {
@@ -18,11 +17,15 @@ type SettingsConfig struct {
 }
 
 type DiscordConfig struct {
-	GuildIDs         []string    `yaml:"guildIDs"`
-	Auth             AuthConfig  `yaml:"auth"`
-	Channels         []string    `yaml:"channels"`
-	StarBoardChannel string      `yaml:"starboard-channel"`
-	Redis            RedisConfig `yaml:"redis"`
+	CommandPrefix             string      `yaml:"cmd_prefix"`
+	GuildIDs                  []string    `yaml:"guildIDs"`
+	Auth                      AuthConfig  `yaml:"auth"`
+	Channels                  []string    `yaml:"threads-filtered"`
+	AllowedURLPrefix          []string    `yaml:"allowed-urls-threads-filtered"`
+	StarBoardChannel          string      `yaml:"starboard-channel"`
+	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
+	Redis                     RedisConfig `yaml:"redis"`
+	HelloReply                []string    `yaml:"hello-replies"`
 }
 
 type RedisConfig struct {
@@ -41,4 +44,5 @@ type BotConfig struct {
 type Handler struct {
 	Name     string
 	Function interface{}
+	File     string
 }

@@ -1,0 +1,47 @@
+discord:
+  cmd_prefix: ">>"
+  guildIDs:
+  - "1397965284765077504"
+
+  starboard-channel: "1423710458606780599"
+  # starboard-channel: "1416394927310635058"
+
+  starboard-disabled-channels:
+  - "1399658766403899454"
+  - "1418667215913222215"
+  - "1423710458606780599"
+
+  hello-replies:
+  - "Hello!"
+  - "Holaaaa!"
+  - "Hiiieees!"
+  - "Bonjour!"
+  - "Allo >w<"
+  # <-- cherry
+  - "Guten Tag"
+  - namaste
+  - good morning 
+  - Aloha!!
+  - Assalamualaikum
+  - Adab
+  - Top of the morning!
+  - beep boop!
+  - ohayouuuu!
+
+  threads-filtered:
+  - "1399658766403899454"
+  - "1399435019847602341"
+  - "1444035347695665243"
+
+  allowed-urls-threads-filtered:
+  - 'https://instagram.com'
+  - 'https://youtube.com'
+  - 'https://youtu.be'
+  - 'https://tumblr.com'
+
+settings:
+  star:
+    threshold: 1
+
+
+ 
