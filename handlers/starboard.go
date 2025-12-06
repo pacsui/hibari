@@ -79,17 +79,16 @@ func SendMessageOnKey(c ChanMsgKeyType, s *discordgo.Session, emoji string, coun
 		return
 	}
 
+	msgURL := "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID
+
 	toEmbed := discordgo.MessageEmbed{
-		URL: "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID,
+		URL: msgURL,
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    getMessage.Author.GlobalName,
 			IconURL: getMessage.Author.AvatarURL(""),
 			URL:     "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		},
-		Description: getMessage.Content,
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "[Link](https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID + ")",
-		},
+		Description: getMessage.Content + "\n\n[Message Link](" + msgURL + ")",
 	}
 	if len(getMessage.Attachments) > 0 {
 		// if(getMessage.Attachments[0].ContentType)
@@ -102,7 +101,7 @@ func SendMessageOnKey(c ChanMsgKeyType, s *discordgo.Session, emoji string, coun
 		DiscordBotConfigValues.StarBoardChannel,
 		&discordgo.MessageSend{
 			Content: fmt.Sprintf(
-				"『 %sx%d 』 %s in %s",
+				"/ %s `x%d` / %s - %s",
 				emoji,
 				count,
 				getMessage.Author.Mention(),

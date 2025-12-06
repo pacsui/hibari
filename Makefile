@@ -1,3 +1,6 @@
+include .env
+export
+
 build: clean
 	go build -o ./bin/hibari
 

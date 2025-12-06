@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	log "github.com/charmbracelet/log"
@@ -32,33 +34,49 @@ func init() {
 	}
 	handlers.DiscordBotConfigValues = dConVal
 
+	r, _ := InitRedis()
+
 	HandlerList = []handlers.Handler{
+		{
+			Name:     "starboard_handler",
+			Function: handlers.HandleStarBoardAdd,
+			File:     "starboard.go",
+		},
+		{
+			Name:     "thread_creator",
+			Function: handlers.HandleMessageInChannelPool,
+			File:     "channelthread.go",
+		},
+		{
+			Name:     "old commands handler",
+			Function: handlers.OnMessageOldCommandHandler,
+			File:     "miscported.go",
+		},
 		// {
-		// 	Name:     "starboard handler",
-		// 	Function: handlers.HandleStarBoardAdd,
-		// },
-		// {
-		// 	Name:     "thread creator",
-		// 	Function: handlers.HandleMessageInChannelPool,
-		// },
-		// handlers.Handler{
-		// 	Name:     "old commands handler",
-		// 	Function: handlers.OnMessageOldCommandHandler,
-		// },
-		// handlers.Handler{
 		// 	Name:     "impersonation handler",
 		// 	Function: handlers.HandleImpersonation,
+		// 	File:     "miscported",
 		// },
-		handlers.Handler{
-			Name:     "cap statboard",
-			Function: handlers.CapBoardHandler,
+		{
+			Name: "cap bg counter",
+			Function: func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+				handlers.CapBoardHandler(s, m, r)
+			},
+			File: "capboard.go",
+		},
+		{
+			Name: "cap commands",
+			Function: func(s *discordgo.Session, m *discordgo.MessageCreate) {
+				handlers.CapBoardCommandHandler(s, m, r)
+			},
+			File: "capboard.go",
 		},
 	}
 
 }
 
 func main() {
-	s, _ := discordgo.New("Bot " + handlers.DiscordBotConfigValues.DiscordConfig.Auth.Token)
+	s, _ := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	s.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Infof("Bot running as %s", s.State.User.DisplayName())
 	})
@@ -67,6 +85,17 @@ func main() {
 		s.AddHandler(handler.Function)
 		log.Infof("Added Handler : %s", handler.Name)
 	}
+
+	s.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		if strings.HasPrefix(m.Content, handlers.C("mixins")) {
+			mixinList := "Enabled Mixins :\n```"
+			for _, handler := range HandlerList {
+				mixinList += fmt.Sprintf("- %s (%s)\n", handler.Name, handler.File)
+			}
+			mixinList += "\n```"
+			s.ChannelMessageSend(m.ChannelID, mixinList)
+		}
+	})
 	// done := make(chan struct{})
 	// go handlers.PollingServiceToCrossPost(done, s)
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
