@@ -41,7 +41,7 @@ discord:
 
 settings:
   star:
-    threshold: 1
+    threshold: 5
 
 
  
