@@ -74,6 +74,11 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 	return BConfig, nil
 }
 
+func MessageURL(channelID string, messageID string) string {
+	return "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + channelID + "/" + messageID
+
+}
+
 func C(cmd_str string) string {
 	// convert `command` to `>>command`
 	return DiscordBotConfigValues.CommandPrefix + cmd_str
