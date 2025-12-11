@@ -30,6 +30,7 @@ func ChanMsgKey(cID string, mID string) ChanMsgKeyType {
 }
 
 func Hlog(s *discordgo.Session, content string) {
+	// TODO: Implement discord channel logging?
 	s.ChannelMessageSend("1427259484299857961", content)
 	log.Info(content)
 }
@@ -43,6 +44,7 @@ func GetRandomThreadRequest(username string) string {
 }
 
 func ReadConfigFile(filepath string) (BotConfig, error) {
+	// Reads `config.yaml` and populates BotConfig struct
 	BConfig := BotConfig{}
 	configBytes, err := os.ReadFile(filepath)
 	log.Debug(string(configBytes))
@@ -73,5 +75,6 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 }
 
 func C(cmd_str string) string {
+	// convert `command` to `>>command`
 	return DiscordBotConfigValues.CommandPrefix + cmd_str
 }
