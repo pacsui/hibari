@@ -71,6 +71,11 @@ func init() {
 			Function: handlers.ConfessionMessageHandler,
 			File:     "confession.go",
 		},
+		{
+			Name:     "confession Report handler",
+			Function: handlers.ConfessionVoteDelete,
+			File:     "confession.go",
+		},
 	}
 
 }

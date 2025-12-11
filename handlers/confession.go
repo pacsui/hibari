@@ -9,9 +9,19 @@ import (
 )
 
 func ConfessionVoteDelete(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
+	msgLink, _ := s.ChannelMessage(r.ChannelID, r.MessageID)
+
+	// Check if already sent by using emoji lock lol
+	for _, emoji := range msgLink.Reactions {
+		if emoji.Emoji.Name == "👍🏽" {
+			return
+		}
+	}
+
 	if r.ChannelID == DiscordBotConfigValues.ConfessionChannel {
 		if r.Emoji.Name == "❌" {
-			// do some deletion logic same as starboard calculation? if needed or ask to ping mods?
+			s.MessageReactionAdd(msgLink.ChannelID, msgLink.ID, "👍🏽")
+			s.ChannelMessageSend("1397965285851529296", "Confession was reported by "+r.Member.Mention()+"\n[Message URL]("+MessageURL(msgLink.ChannelID, msgLink.ID)+")")
 		}
 	}
 }
@@ -25,7 +35,7 @@ func SendConfessionMessage(s *discordgo.Session, message string) {
 		},
 		Description: message,
 		Footer: &discordgo.MessageEmbedFooter{
-			Text: "Ping Mods to have this deleted",
+			Text: "react ❌ for reporting",
 		},
 	}
 	s.ChannelMessageSendEmbed(
