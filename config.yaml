@@ -6,6 +6,8 @@ discord:
   starboard-channel: "1423710458606780599"
   # starboard-channel: "1416394927310635058"
 
+  confession-channel: "1448718547198021673"
+
   starboard-disabled-channels:
   - "1399658766403899454"
   - "1418667215913222215"
@@ -41,7 +43,7 @@ discord:
 
 settings:
   star:
-    threshold: 1
+    threshold: 5
 
 
  

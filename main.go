@@ -52,11 +52,6 @@ func init() {
 			Function: handlers.OnMessageOldCommandHandler,
 			File:     "miscported.go",
 		},
-		// {
-		// 	Name:     "impersonation handler",
-		// 	Function: handlers.HandleImpersonation,
-		// 	File:     "miscported",
-		// },
 		{
 			Name: "cap bg counter",
 			Function: func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
@@ -70,6 +65,11 @@ func init() {
 				handlers.CapBoardCommandHandler(s, m, r)
 			},
 			File: "capboard.go",
+		},
+		{
+			Name:     "confession handler",
+			Function: handlers.ConfessionMessageHandler,
+			File:     "confession.go",
 		},
 	}
 

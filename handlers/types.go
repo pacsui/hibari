@@ -23,6 +23,7 @@ type DiscordConfig struct {
 	Channels                  []string    `yaml:"threads-filtered"`
 	AllowedURLPrefix          []string    `yaml:"allowed-urls-threads-filtered"`
 	StarBoardChannel          string      `yaml:"starboard-channel"`
+	ConfessionChannel         string      `yaml:"confession-channel"`
 	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
 	Redis                     RedisConfig `yaml:"redis"`
 	HelloReply                []string    `yaml:"hello-replies"`
