@@ -14,5 +14,5 @@ run: build
 	./bin/hibari
 
 docker: build
-	podman build --no-cache -t registry.gitlab.com/itspacchu/containerdump:threadingbot_rc .
-	podman push registry.gitlab.com/itspacchu/containerdump:threadingbot_rc
+	podman build --no-cache -t ghcr.io/pacsui/hibari:latest .
+	podman push ghcr.io/pacsui/hibari:latest
