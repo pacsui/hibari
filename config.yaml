@@ -1,3 +1,5 @@
+version: "2.0"
+
 discord:
   cmd_prefix: ">>"
   guildIDs:
@@ -6,7 +8,10 @@ discord:
   starboard-channel: "1423710458606780599"
   # starboard-channel: "1416394927310635058"
 
-  confession-channel: "1448718547198021673"
+  # confession-channel: "1448718547198021673"
+  confession-channel: "1416394927310635058" # TEST
+
+  mod-channel: "1416394927310635058"
 
   starboard-disabled-channels:
   - "1399658766403899454"

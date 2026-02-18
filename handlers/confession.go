@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"math/rand"
 	"strings"
 	"time"
 
@@ -8,6 +9,12 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+var (
+	// MsgStore stores the linux epoch of user chan string
+	MsgStore = map[string]int64{}
+)
+
+// ConfessionVoteDelete : NOP
 func ConfessionVoteDelete(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
 	msgLink, _ := s.ChannelMessage(r.ChannelID, r.MessageID)
 
@@ -26,7 +33,8 @@ func ConfessionVoteDelete(s *discordgo.Session, r *discordgo.MessageReactionAdd)
 	}
 }
 
-func SendConfessionMessage(s *discordgo.Session, message string) {
+// SendConfessionMessage : sends a message in the channel
+func SendConfessionMessage(s *discordgo.Session, message string, imgURL string) {
 	// Send message, (message Content isnt required to keep it truly anon)
 	embedGen := discordgo.MessageEmbed{
 		Title: "Anon Confession",
@@ -38,12 +46,18 @@ func SendConfessionMessage(s *discordgo.Session, message string) {
 			Text: "react ❌ for reporting",
 		},
 	}
+	if imgURL != "" {
+		embedGen.Image = &discordgo.MessageEmbedImage{
+			URL: imgURL,
+		}
+	}
 	s.ChannelMessageSendEmbed(
 		DiscordBotConfigValues.ConfessionChannel,
 		&embedGen,
 	)
 }
 
+// ConfessionMessageHandler : check if the message in dm and call SendConfessionMessage
 func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	whichChannel, err := s.Channel(m.ChannelID)
 	if err != nil {
@@ -53,8 +67,28 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 		if whichChannel.GuildID == "" {
 			// No GuildID, its sent in DM so allowed
 			messageToSend, _ := strings.CutPrefix(m.Content, C("confess"))
+			uepoch, ok := MsgStore[m.ChannelID]
+			if ok {
+				delta := time.Now().Unix() - uepoch
+				if delta < 60 {
+					// well not allowed to send message cuz rate limited
+					s.MessageReactionAdd(m.ChannelID, m.ID, "⏳")
+					log.Debugf("%ds < 60s", delta)
+					return
+				}
+			}
+			MsgStore[m.ChannelID] = time.Now().Unix() // store current epoch for the channel
 			s.MessageReactionAdd(m.ChannelID, m.ID, "okies:1415595699214618666")
-			go SendConfessionMessage(s, messageToSend)
+			time.Sleep(time.Second * time.Duration(rand.Intn(10))) //await random time before sending
+			imgs := ""
+			if len(m.Attachments) > 0 {
+				if strings.Contains(m.Attachments[0].ContentType, "image") {
+					log.Debug("Confession has an image... forwarding->")
+					imgs = m.Attachments[0].URL
+				}
+
+			}
+			go SendConfessionMessage(s, messageToSend, imgs)
 
 		} else {
 			// Message sent in channel somewhere, ask them to send in DM
