@@ -24,6 +24,7 @@ type DiscordConfig struct {
 	AllowedURLPrefix          []string    `yaml:"allowed-urls-threads-filtered"`
 	StarBoardChannel          string      `yaml:"starboard-channel"`
 	ConfessionChannel         string      `yaml:"confession-channel"`
+	ModChannel                string      `yaml:"mod-channel"`
 	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
 	Redis                     RedisConfig `yaml:"redis"`
 	HelloReply                []string    `yaml:"hello-replies"`
@@ -40,6 +41,7 @@ type BotConfig struct {
 	SettingsConfig `yaml:"settings"`
 	DiscordConfig  `yaml:"discord"`
 	RedisConfig    `yaml:"redis"`
+	Version        string `yaml:"version"`
 }
 
 type Handler struct {
