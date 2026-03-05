@@ -39,6 +39,11 @@ func handleStarBoardStuff(s *discordgo.Session, chanMsgType ChanMsgKeyType, todo
 }
 
 func HandleStarBoardAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+	// starboard should ignore non added Guilds message reactions
+	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildIDs[0] {
+		return
+	}
+
 	postedChannel, err := s.Channel(m.ChannelID)
 	if err != nil {
 		return

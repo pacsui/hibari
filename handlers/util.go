@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
@@ -17,6 +19,18 @@ var threadRequests = []string{
 type ChanMsgKeyType struct {
 	ChanID string
 	MsgID  string
+}
+
+func GenerateColorHex(uid string) int {
+	salt := time.Now().Unix() / 3600
+	input := fmt.Sprintf("%s-%d", uid, salt)
+	hash := sha256.Sum256([]byte(input))
+
+	r := hash[0]
+	g := hash[1]
+	b := hash[2]
+
+	return int((r << 16) | (g << 8) | b)
 }
 
 func ChanMsgKey(cID string, mID string) ChanMsgKeyType {
