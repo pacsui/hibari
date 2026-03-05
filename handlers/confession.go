@@ -34,7 +34,7 @@ func ConfessionVoteDelete(s *discordgo.Session, r *discordgo.MessageReactionAdd)
 }
 
 // SendConfessionMessage : sends a message in the channel
-func SendConfessionMessage(s *discordgo.Session, message string, imgURL string) {
+func SendConfessionMessage(s *discordgo.Session, message string, imgURL string, colHex int) {
 	// Send message, (message Content isnt required to keep it truly anon)
 	embedGen := discordgo.MessageEmbed{
 		Title: "Anon Confession",
@@ -45,6 +45,7 @@ func SendConfessionMessage(s *discordgo.Session, message string, imgURL string) 
 		Footer: &discordgo.MessageEmbedFooter{
 			Text: "react ❌ for reporting",
 		},
+		Color: colHex,
 	}
 	if imgURL != "" {
 		embedGen.Image = &discordgo.MessageEmbedImage{
@@ -63,6 +64,13 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 	if err != nil {
 		log.Warn("no channel? how can this be?")
 	}
+
+	// non Guild members aren't allowed to send message in confession
+	_, err = s.GuildMember(DiscordBotConfigValues.DiscordConfig.GuildIDs[0], m.Author.ID)
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, "??")
+	}
+
 	if strings.HasPrefix(m.Content, C("confess")) {
 		if whichChannel.GuildID == "" {
 			// No GuildID, its sent in DM so allowed
@@ -79,6 +87,11 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 			}
 			MsgStore[m.ChannelID] = time.Now().Unix() // store current epoch for the channel
 			s.MessageReactionAdd(m.ChannelID, m.ID, "okies:1415595699214618666")
+
+			if strings.ContainsAny(messageToSend, "@") {
+				s.ChannelMessageSend(m.ChannelID, "> Mentions aren't supported btw!")
+			}
+
 			time.Sleep(time.Second * time.Duration(rand.Intn(10))) //await random time before sending
 			imgs := ""
 			if len(m.Attachments) > 0 {
@@ -88,7 +101,7 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 				}
 
 			}
-			go SendConfessionMessage(s, messageToSend, imgs)
+			go SendConfessionMessage(s, messageToSend, imgs, GenerateColorHex(m.Author.ID))
 
 		} else {
 			// Message sent in channel somewhere, ask them to send in DM
