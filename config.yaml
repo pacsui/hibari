@@ -13,6 +13,8 @@ discord:
 
   mod-channel: "1416394927310635058"
 
+  announcement-channel: "1416394927310635058" #TEST
+
   starboard-disabled-channels:
   - "1399658766403899454"
   - "1418667215913222215"
