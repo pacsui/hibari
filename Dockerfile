@@ -1,7 +1,9 @@
-FROM alpine
+FROM alpine:latest 
 
-WORKDIR /app
+ARG TARGETARCH
 
-COPY bin/hibari /app/hibari
+COPY ./bin/hibari-${TARGETARCH} /usr/local/bin/hibari
 
-CMD ["/app/hibari"]
+RUN chmod +x /usr/local/bin/hibari
+
+ENTRYPOINT ["/usr/local/bin/hibari"]
