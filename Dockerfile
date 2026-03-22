@@ -2,8 +2,8 @@ FROM alpine:latest
 
 ARG TARGETARCH
 
-COPY ./bin/hibari-${TARGETARCH} /usr/local/bin/hibari
+COPY ./bin/hibari-${TARGETARCH} /bin/hibari
 
-RUN chmod +x /usr/local/bin/hibari
+RUN chmod +x /bin/hibari
 
-ENTRYPOINT ["/usr/local/bin/hibari"]
+ENTRYPOINT ["hibari"]
