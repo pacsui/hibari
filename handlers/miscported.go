@@ -18,7 +18,7 @@ func AmIMentioned(s *discordgo.Session, m *discordgo.MessageCreate) bool {
 	return false
 }
 
-func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func OnMessageCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if m.Author.ID == s.State.User.ID {
 		log.Warnf("Self triggered? --> %s", m.ID)
@@ -57,10 +57,12 @@ func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate
 	}
 
 	switch {
-	case strings.HasPrefix(m.Content, C("av")), strings.HasPrefix(m.Content, ">>avatar"):
+	case strings.HasPrefix(m.Content, C("av")), strings.HasPrefix(m.Content, C("avatar")):
 		go HandleAvatarEmbedReply(s, m)
 	case strings.HasPrefix(m.Content, C("sayas")):
 		HandleImpersonation(s, m)
+	case strings.HasPrefix(m.Content, C("admin")):
+		AdminHandler(s, m)
 	case strings.HasPrefix(m.Content, C("mixins")):
 		// already handled
 		return
