@@ -49,7 +49,7 @@ func init() {
 		},
 		{
 			Name:     "old commands handler",
-			Function: handlers.OnMessageOldCommandHandler,
+			Function: handlers.OnMessageCommandHandler,
 			File:     "miscported.go",
 		},
 		{
