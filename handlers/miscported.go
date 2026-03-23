@@ -19,9 +19,11 @@ func AmIMentioned(s *discordgo.Session, m *discordgo.MessageCreate) bool {
 }
 
 func OnMessageCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildID {
+		return
+	}
 
 	if m.Author.ID == s.State.User.ID {
-		log.Warnf("Self triggered? --> %s", m.ID)
 		return
 	}
 

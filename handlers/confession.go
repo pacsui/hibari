@@ -65,13 +65,13 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 		log.Warn("no channel? how can this be?")
 	}
 
-	// non Guild members aren't allowed to send message in confession
-	_, err = s.GuildMember(DiscordBotConfigValues.DiscordConfig.GuildIDs[0], m.Author.ID)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "??")
-	}
-
 	if strings.HasPrefix(m.Content, C("confess")) {
+		// non Guild members aren't allowed to send message in confession
+		_, err = s.GuildMember(DiscordBotConfigValues.DiscordConfig.GuildID, m.Author.ID)
+		if err != nil {
+			log.Warnf("Non guild member has triggered %s", C("confess"))
+			return
+		}
 		if whichChannel.GuildID == "" {
 			// No GuildID, its sent in DM so allowed
 			messageToSend, _ := strings.CutPrefix(m.Content, C("confess"))

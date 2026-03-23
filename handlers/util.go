@@ -9,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v3"
 )
 
@@ -61,7 +62,6 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 	// Reads `config.yaml` and populates BotConfig struct
 	BConfig := BotConfig{}
 	configBytes, err := os.ReadFile(filepath)
-	log.Debug(string(configBytes))
 	if err != nil {
 		log.Warn("Config file not found config.yaml")
 		fl, err := os.Create("config.yaml")
@@ -85,11 +85,12 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 		return BotConfig{}, err
 
 	}
+	spew.Dump(BConfig)
 	return BConfig, nil
 }
 
 func MessageURL(channelID string, messageID string) string {
-	return "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + channelID + "/" + messageID
+	return "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildID + "/" + channelID + "/" + messageID
 
 }
 
