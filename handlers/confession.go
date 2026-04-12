@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -78,18 +79,24 @@ func ConfessionMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) 
 			uepoch, ok := MsgStore[m.ChannelID]
 			if ok {
 				delta := time.Now().Unix() - uepoch
-				if delta < 60 {
+				if delta < int64(DiscordBotConfigValues.ConfessionCooldown) {
 					// well not allowed to send message cuz rate limited
-					s.MessageReactionAdd(m.ChannelID, m.ID, "⏳")
-					log.Debugf("%ds < 60s", delta)
+					s.MessageReactionAdd(m.ChannelID, m.ID, "pno:1415778132463456258")
+					s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("> wait %ds before sending again!", delta))
 					return
 				}
 			}
 			MsgStore[m.ChannelID] = time.Now().Unix() // store current epoch for the channel
-			s.MessageReactionAdd(m.ChannelID, m.ID, "okies:1415595699214618666")
+			s.MessageReactionAdd(m.ChannelID, m.ID, "pyes:1415778092500254741")
 
 			if strings.ContainsAny(messageToSend, "@") {
 				s.ChannelMessageSend(m.ChannelID, "> Mentions aren't supported btw!")
+			}
+
+			if len(messageToSend) < 5 {
+				s.ChannelMessageSend(m.ChannelID, "> Too short message... dropping this message")
+				s.MessageReactionAdd(m.ChannelID, m.ID, "pno:1415778132463456258")
+				return
 			}
 
 			time.Sleep(time.Second * time.Duration(rand.Intn(10))) //await random time before sending

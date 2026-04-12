@@ -3,125 +3,208 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
-	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func CapBoardHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd, r *redis.Client) {
+var (
+	MONGODB_URI string
+	capboard    *mongo.Collection
+)
+
+type CapTransaction struct {
+	MessageID string    `bson:"message_id"`
+	ChannelID string    `bson:"channel_id"`
+	GuildID   string    `bson:"guild_id"`
+	GiverID   string    `bson:"giver_id"`
+	TakerID   string    `bson:"taker_id"`
+	CreatedAt time.Time `bson:"created_at"`
+}
+
+type LeaderboardEntry struct {
+	UserID string `bson:"_id"`
+	Count  int    `bson:"count"`
+}
+
+type PostLeaderboardEntry struct {
+	MessageID string `bson:"_id"`
+	ChannelID string `bson:"channel_id"`
+	GuildID   string `bson:"guild_id"`
+	Count     int    `bson:"count"`
+}
+
+func init() {
+	log.Info("Connecting to MongoDB...")
+	MONGODB_URI := os.Getenv("MONGODB_URI")
+	client, err := mongo.Connect(options.Client().
+		ApplyURI(MONGODB_URI))
+	if err != nil {
+		log.Debug(MONGODB_URI)
+		log.Error(err.Error())
+	}
+	capboard = client.Database("Hibari").Collection("Capboard")
+}
+
+func CapBoardHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	switch m.Emoji.Name {
 	case "🧢":
 		log.Debug("Processing Cap Reaction")
-		CapBoardProcessing(s, m, r)
+		CapBoardProcessing(s, m)
 	}
 }
 
-func CapBoardCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate, r *redis.Client) {
+func CapBoardCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.HasPrefix(m.Content, C("caps")) {
-		if len(m.Mentions) <= 0 {
-			embedGen := CapBoardEmbedPreview(s, r, m.Author.ID)
-			if embedGen == nil {
-				log.Errorf("unable to generate embed? value nils?")
-				return
-			}
-			s.ChannelMessageSendEmbed(m.ChannelID, embedGen)
-		}
+		SendCapboardStats(s, m.ChannelID, 0x79AEA3)
 	}
 }
 
-func CapBoardEmbedPreview(s *discordgo.Session, r *redis.Client, UID string) *discordgo.MessageEmbed {
-	disUser, err := s.User(UID)
-	if err != nil {
-		log.Errorf("unable to fetch disUser. %s", err.Error())
-		return nil
-	}
-
-	CapsGiven, CapsRecv := GetCapGiven(r, UID), GetCapRecv(r, UID)
-
-	emb := discordgo.MessageEmbed{
-		Title: fmt.Sprintf("CapStats for %s", disUser.GlobalName),
-		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: disUser.AvatarURL("16"),
-		},
-		Color:       0xFF5656,
-		Description: fmt.Sprintf("```given : %s\ngotten : %s\n```", CapsGiven, CapsRecv),
-	}
-	return &emb
-}
-
-func GetCapGiven(r *redis.Client, UID string) string {
-	caps := r.Get(context.TODO(), "cap:"+UID+":giv").Val()
-	// if err != nil {
-	// 	log.Error(err.Error())
-	// 	return ""
-	// }
-	return caps
-}
-func GetCapRecv(r *redis.Client, UID string) string {
-	caps := r.Get(context.TODO(), "cap:"+UID+":recv").Val()
-	// if err != redis.Nil {
-	// 	log.Error(err.Error())
-	// 	return ""
-	// }
-	return caps
-}
-func GetCapGivenRecent(r *redis.Client, UID string) string {
-	log.Debug(UID)
-	caps, err := r.Get(context.TODO(), "cap:"+UID+":giv_prev").Result()
-	if err != redis.Nil {
-		log.Error(err.Error())
-		return ""
-	}
-	return caps
-}
-func GetCapRecvRecent(r *redis.Client, UID string) string {
-	log.Debug(UID)
-	caps, err := r.Get(context.TODO(), "cap:"+UID+":recv_prev").Result()
-	if err != redis.Nil {
-		log.Error(err.Error())
-		return ""
-	}
-	return caps
-}
-
-func CapBoardProcessing(s *discordgo.Session, m *discordgo.MessageReactionAdd, r *redis.Client) {
+func CapBoardProcessing(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	TakerMessage, err := s.ChannelMessage(m.ChannelID, m.MessageID)
-	log.Debug(m.ChannelID)
 	if err != nil {
-		log.Errorf("this shoudn't happen?")
+		log.Errorf("Failed to retrieve message: %v", err)
 		return
 	}
+
 	GiverUser := m.MessageReaction.UserID
 	Taker := TakerMessage.Author.ID
-	// if GiverUser == Taker {
-	// 	log.Debugf("Self Capping Ignored! %s", GiverUser)
-	// 	return
-	// }
-	log.Debugf("%s capped %s", GiverUser, Taker)
-	{
-		if err := r.Incr(context.TODO(), "cap:"+GiverUser+":giv").Err(); err != nil {
-			log.Error(err.Error())
-			r.Del(context.Background(), "cap:"+GiverUser+":giv")
-			return
-		}
-		if err := r.Set(context.TODO(), "cap:"+GiverUser, ":giv_prev:"+Taker, 0).Err(); err != nil {
-			log.Error(err.Error())
-			r.Del(context.Background(), "cap:"+GiverUser, ":giv_prev:"+Taker)
-			return
-		}
 
-		if err := r.Incr(context.TODO(), "cap:"+Taker+":recv").Err(); err != nil {
-			log.Error(err.Error())
-			r.Del(context.Background(), "cap:"+Taker+":recv")
-			return
-		}
-		if err := r.Set(context.TODO(), "cap:"+Taker, ":recv_prev:"+GiverUser, 0).Err(); err != nil {
-			log.Error(err.Error())
-			r.Del(context.Background(), "cap:"+Taker, ":recv_prev:"+GiverUser)
-			return
-		}
+	if GiverUser == Taker {
+		log.Debugf("User %s tried to cap themselves", GiverUser)
+		return
 	}
 
+	capData := CapTransaction{
+		MessageID: m.MessageID,
+		ChannelID: m.ChannelID,
+		GuildID:   m.GuildID,
+		GiverID:   GiverUser,
+		TakerID:   Taker,
+		CreatedAt: time.Now(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err = capboard.InsertOne(ctx, capData)
+	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			log.Debugf("Duplicate cap blocked: %s on message %s", GiverUser, m.MessageID)
+			return
+		}
+		log.Errorf("Failed to insert cap: %v", err)
+		return
+	}
+
+	log.Debugf("Successfully recorded cap! Giver: %s -- Taker: %s", GiverUser, Taker)
+}
+
+func SendCapboardStats(s *discordgo.Session, channelID string, colHex int) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	var topGivers []LeaderboardEntry
+	giverCursor, _ := capboard.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$giver_id"}, {Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}}}}},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		bson.D{{Key: "$limit", Value: 5}},
+	})
+	if giverCursor != nil {
+		giverCursor.All(ctx, &topGivers)
+	}
+
+	var topTakers []LeaderboardEntry
+	takerCursor, _ := capboard.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$taker_id"}, {Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}}}}},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		bson.D{{Key: "$limit", Value: 5}},
+	})
+	if takerCursor != nil {
+		takerCursor.All(ctx, &topTakers)
+	}
+
+	var topPosts []PostLeaderboardEntry
+	postCursor, _ := capboard.Aggregate(ctx, mongo.Pipeline{
+		bson.D{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$message_id"},
+			{Key: "channel_id", Value: bson.D{{Key: "$first", Value: "$channel_id"}}},
+			{Key: "guild_id", Value: bson.D{{Key: "$first", Value: "$guild_id"}}},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		bson.D{{Key: "$limit", Value: 5}},
+	})
+	if postCursor != nil {
+		postCursor.All(ctx, &topPosts)
+	}
+
+	giverStr, takerStr, postStr := "", "", ""
+
+	for i, entry := range topGivers {
+		giverStr += fmt.Sprintf("**%d ** - <@%s> - `%d`\n", i+1, entry.UserID, entry.Count)
+	}
+	for i, entry := range topTakers {
+		takerStr += fmt.Sprintf("**%d** - <@%s> - `%d`\n", i+1, entry.UserID, entry.Count)
+	}
+	for i, entry := range topPosts {
+		link := fmt.Sprintf("https://discord.com/channels/%s/%s/%s", entry.GuildID, entry.ChannelID, entry.MessageID)
+		msg, err := s.ChannelMessage(entry.ChannelID, entry.MessageID)
+		toSend := ""
+		if err != nil {
+			toSend = "Link to message"
+		}
+		toSend = msg.Content[:25]
+		postStr += fmt.Sprintf("**%d** - [%s](%s) - `%d caps`\n", i+1, toSend, link, entry.Count)
+	}
+
+	if giverStr == "" {
+		giverStr = "No data yet!"
+	}
+	if takerStr == "" {
+		takerStr = "No data yet!"
+	}
+	if postStr == "" {
+		postStr = "No data yet!"
+	}
+
+	embedGen := discordgo.MessageEmbed{
+		Title: "Capboard Statistics",
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: "https://cdn.pacsui.me/imgs/hibari/hibari_look_cap.jpg",
+		},
+		Description: "Top capped data:",
+		Color:       colHex,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Top Caps Given",
+				Value:  giverStr,
+				Inline: true,
+			},
+			{
+				Name:   "Top Caps Taken",
+				Value:  takerStr,
+				Inline: true,
+			},
+			{
+				Name:   "Top Capped Posts",
+				Value:  postStr,
+				Inline: false,
+			},
+		},
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: "Hibaricap!!",
+		},
+	}
+
+	_, err := s.ChannelMessageSendEmbed(channelID, &embedGen)
+	if err != nil {
+		fmt.Printf("Failed to send leaderboard embed: %v\n", err)
+	}
 }

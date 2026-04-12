@@ -34,8 +34,6 @@ func init() {
 	}
 	handlers.DiscordBotConfigValues = dConVal
 
-	r, _ := InitRedis()
-
 	HandlerList = []handlers.Handler{
 		{
 			Name:     "starboard_handler",
@@ -55,14 +53,14 @@ func init() {
 		{
 			Name: "cap bg counter",
 			Function: func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-				handlers.CapBoardHandler(s, m, r)
+				handlers.CapBoardHandler(s, m)
 			},
 			File: "capboard.go",
 		},
 		{
 			Name: "cap commands",
 			Function: func(s *discordgo.Session, m *discordgo.MessageCreate) {
-				handlers.CapBoardCommandHandler(s, m, r)
+				handlers.CapBoardCommandHandler(s, m)
 			},
 			File: "capboard.go",
 		},

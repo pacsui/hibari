@@ -25,6 +25,7 @@ type DiscordConfig struct {
 	StarBoardChannel          string      `yaml:"starboard-channel"`
 	AnnounceChannel           string      `yaml:"announcement-channel"`
 	ConfessionChannel         string      `yaml:"confession-channel"`
+	ConfessionCooldown        int         `yaml:"confession-cooldown"`
 	ModChannel                string      `yaml:"mod-channel"`
 	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
 	Redis                     RedisConfig `yaml:"redis"`

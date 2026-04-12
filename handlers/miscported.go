@@ -94,7 +94,7 @@ func HandleAvatarEmbedReply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Image: &discordgo.MessageEmbedImage{
 			URL: WhoUser.AvatarURL("512"),
 		},
-		Color: 0x79AEA3,
+		Color: 0xDBCDF0,
 	}
 	// s.ChannelMessageSendEmbedReply(
 	// 	m.ChannelID,
