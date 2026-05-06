@@ -36,6 +36,11 @@ func init() {
 
 	HandlerList = []handlers.Handler{
 		{
+			Name:     "admin commands handler",
+			Function: handlers.AdminHandler,
+			File:     "admin.go",
+		},
+		{
 			Name:     "starboard_handler",
 			Function: handlers.HandleStarBoardAdd,
 			File:     "starboard.go",
@@ -70,10 +75,15 @@ func init() {
 			File:     "confession.go",
 		},
 		{
-			Name:     "confession Report handler",
-			Function: handlers.ConfessionVoteDelete,
-			File:     "confession.go",
+			Name:     "vent handler",
+			Function: handlers.VentMessageHandler,
+			File:     "vent.go",
 		},
+		// {
+		// 	Name:     "confession Report handler",
+		// 	Function: handlers.ConfessionVoteDelete,
+		// 	File:     "confession.go",
+		// },
 	}
 
 }
@@ -99,8 +109,6 @@ func main() {
 			s.ChannelMessageSend(m.ChannelID, mixinList)
 		}
 	})
-	// done := make(chan struct{})
-	// go handlers.PollingServiceToCrossPost(done, s)
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
 
 	err := s.Open()

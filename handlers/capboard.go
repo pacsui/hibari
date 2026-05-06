@@ -55,7 +55,6 @@ func init() {
 func CapBoardHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	switch m.Emoji.Name {
 	case "🧢":
-		log.Debug("Processing Cap Reaction")
 		CapBoardProcessing(s, m)
 	}
 }
@@ -156,11 +155,22 @@ func SendCapboardStats(s *discordgo.Session, channelID string, colHex int) {
 	for i, entry := range topPosts {
 		link := fmt.Sprintf("https://discord.com/channels/%s/%s/%s", entry.GuildID, entry.ChannelID, entry.MessageID)
 		msg, err := s.ChannelMessage(entry.ChannelID, entry.MessageID)
+
 		toSend := ""
 		if err != nil {
-			toSend = "Link to message"
+			toSend = "Deleted Message"
+		} else {
+			if len(msg.Content) > 0 {
+				toSend = msg.Content[:min(25, len(msg.Content))]
+				if len(msg.Content) > 25 {
+					toSend += "..."
+				}
+			} else {
+				toSend = "Image/Attachment"
+			}
 		}
-		toSend = msg.Content[:25]
+		toSend = strings.ReplaceAll(toSend, "\n", " ")
+
 		postStr += fmt.Sprintf("**%d** - [%s](%s) - `%d caps`\n", i+1, toSend, link, entry.Count)
 	}
 
@@ -206,5 +216,36 @@ func SendCapboardStats(s *discordgo.Session, channelID string, colHex int) {
 	_, err := s.ChannelMessageSendEmbed(channelID, &embedGen)
 	if err != nil {
 		fmt.Printf("Failed to send leaderboard embed: %v\n", err)
+	}
+}
+
+func CapBoardRemoveHandler(s *discordgo.Session, m *discordgo.MessageReactionRemove) {
+	switch m.Emoji.Name {
+	case "🧢":
+		CapBoardRemoveProcessing(s, m)
+	}
+}
+
+func CapBoardRemoveProcessing(s *discordgo.Session, m *discordgo.MessageReactionRemove) {
+	GiverUser := m.UserID
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{
+		{Key: "message_id", Value: m.MessageID},
+		{Key: "giver_id", Value: GiverUser},
+	}
+
+	res, err := capboard.DeleteOne(ctx, filter)
+	if err != nil {
+		log.Errorf("Failed to remove cap from DB: %v", err)
+		return
+	}
+
+	if res.DeletedCount > 0 {
+		log.Debugf("Successfully removed cap! Giver: %s -- Message: %s", GiverUser, m.MessageID)
+	} else {
+		log.Debugf("Cap removal ignored: record not found for Giver %s on message %s", GiverUser, m.MessageID)
 	}
 }

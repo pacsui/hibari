@@ -9,8 +9,10 @@ discord:
 
   # confession-channel: "1448718547198021673"
   confession-channel: "1416394927310635058" # TEST
-  confession-cooldown: 100
+  vent-channel: "1399656804455157906" 
+  confession-cooldown: 10
 
+  # mod-channel: "1416394927310635058"
   mod-channel: "1416394927310635058"
 
   announcement-channel: "1416394927310635058" #TEST

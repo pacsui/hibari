@@ -43,6 +43,14 @@ func OnMessageCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go s.MessageReactionAdd(m.ChannelID, m.ID, "💀")
 	}
 
+	if strings.Contains(m.Content, "https://instagram.com/") || strings.Contains(m.Content, "https://www.instagram.com") {
+		go s.ChannelMessageSend(m.ChannelID, strings.ReplaceAll(m.Content, "instagram.com", "vxinstagram.com"))
+	}
+
+	if strings.Contains(m.Content, "https://reddit.com/") || strings.Contains(m.Content, "https://www.reddit.com/") {
+		go s.ChannelMessageSend(m.ChannelID, strings.ReplaceAll(m.Content, "reddit.com", "vxreddit.com"))
+	}
+
 	if strings.Contains(strings.ToLower(m.Content[:min(len(m.Content), 50)]), "clanker") && rand.Intn(5) == 0 {
 		sadgeMoji := []string{
 			"psadge:1415778308490137730",
@@ -64,12 +72,8 @@ func OnMessageCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case strings.HasPrefix(m.Content, C("sayas")):
 		HandleImpersonation(s, m)
 	case strings.HasPrefix(m.Content, C("admin")):
+		log.Debug("Handling admin commands")
 		AdminHandler(s, m)
-	case strings.HasPrefix(m.Content, C("mixins")):
-		// already handled
-		return
-	default:
-		log.Warn("Command not found!?")
 	}
 }
 

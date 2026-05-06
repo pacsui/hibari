@@ -34,6 +34,31 @@ func ConfessionVoteDelete(s *discordgo.Session, r *discordgo.MessageReactionAdd)
 	}
 }
 
+// ConfessionVoteDelete : NOP
+func ConfessionForceCensor(s *discordgo.Session, mId string) {
+	log.Debug("Attempting to censor", mId)
+	messageObj, err := s.ChannelMessage(DiscordBotConfigValues.ConfessionChannel, mId)
+	if err != nil {
+		log.Warnf("unable to censor confession : %s", err.Error())
+		return
+	}
+	firstConfessionEmbed := messageObj.Embeds[0]
+	firstConfessionEmbed.Description = "REDACTED!! by Admin"
+	s.ChannelMessageEditEmbed(DiscordBotConfigValues.ConfessionChannel, mId, firstConfessionEmbed)
+}
+
+func VentForceCensor(s *discordgo.Session, mId string) {
+	log.Debug("Attempting to censor", mId)
+	messageObj, err := s.ChannelMessage(DiscordBotConfigValues.VentChannel, mId)
+	if err != nil {
+		log.Warnf("unable to censor vent : %s", err.Error())
+		return
+	}
+	firstConfessionEmbed := messageObj.Embeds[0]
+	firstConfessionEmbed.Description = "REDACTED!! by Admin"
+	s.ChannelMessageEditEmbed(DiscordBotConfigValues.VentChannel, mId, firstConfessionEmbed)
+}
+
 // SendConfessionMessage : sends a message in the channel
 func SendConfessionMessage(s *discordgo.Session, message string, imgURL string, colHex int) {
 	// Send message, (message Content isnt required to keep it truly anon)
@@ -53,10 +78,32 @@ func SendConfessionMessage(s *discordgo.Session, message string, imgURL string, 
 			URL: imgURL,
 		}
 	}
-	s.ChannelMessageSendEmbed(
+	confessionMessage, err := s.ChannelMessageSendEmbed(
 		DiscordBotConfigValues.ConfessionChannel,
 		&embedGen,
 	)
+	if err != nil {
+		log.Errorf("unable to send confession : %s", err.Error())
+	}
+
+	defer func(m *discordgo.Message) {
+		threadName := m.Content
+		if len(threadName) < 1 {
+			threadName = "... Discussion"
+		}
+		if ch, err := s.State.Channel(m.ChannelID); err != nil || !ch.IsThread() {
+			thread, err := s.MessageThreadStartComplex(m.ChannelID, m.ID, &discordgo.ThreadStart{
+				Name:      threadName[:min(20, len(threadName)-1)],
+				Invitable: true,
+			})
+			if err != nil {
+				Hlog(s, err.Error())
+				return
+			}
+			_, _ = s.ChannelMessageSend(thread.ID, "> confession discussion")
+			m.ChannelID = thread.ID
+		}
+	}(confessionMessage)
 }
 
 // ConfessionMessageHandler : check if the message in dm and call SendConfessionMessage
