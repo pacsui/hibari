@@ -18,10 +18,12 @@ func AmIMentioned(s *discordgo.Session, m *discordgo.MessageCreate) bool {
 	return false
 }
 
-func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func OnMessageCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildID {
+		return
+	}
 
 	if m.Author.ID == s.State.User.ID {
-		log.Warnf("Self triggered? --> %s", m.ID)
 		return
 	}
 
@@ -41,6 +43,14 @@ func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate
 		go s.MessageReactionAdd(m.ChannelID, m.ID, "💀")
 	}
 
+	if strings.Contains(m.Content, "https://instagram.com/") || strings.Contains(m.Content, "https://www.instagram.com") {
+		go s.ChannelMessageSend(m.ChannelID, strings.ReplaceAll(m.Content, "instagram.com", "vxinstagram.com"))
+	}
+
+	if strings.Contains(m.Content, "https://reddit.com/") || strings.Contains(m.Content, "https://www.reddit.com/") {
+		go s.ChannelMessageSend(m.ChannelID, strings.ReplaceAll(m.Content, "reddit.com", "vxreddit.com"))
+	}
+
 	if strings.Contains(strings.ToLower(m.Content[:min(len(m.Content), 50)]), "clanker") && rand.Intn(5) == 0 {
 		sadgeMoji := []string{
 			"psadge:1415778308490137730",
@@ -57,15 +67,13 @@ func OnMessageOldCommandHandler(s *discordgo.Session, m *discordgo.MessageCreate
 	}
 
 	switch {
-	case strings.HasPrefix(m.Content, C("av")), strings.HasPrefix(m.Content, ">>avatar"):
+	case strings.HasPrefix(m.Content, C("av")), strings.HasPrefix(m.Content, C("avatar")):
 		go HandleAvatarEmbedReply(s, m)
 	case strings.HasPrefix(m.Content, C("sayas")):
 		HandleImpersonation(s, m)
-	case strings.HasPrefix(m.Content, C("mixins")):
-		// already handled
-		return
-	default:
-		log.Warn("Command not found!?")
+	case strings.HasPrefix(m.Content, C("admin")):
+		log.Debug("Handling admin commands")
+		AdminHandler(s, m)
 	}
 }
 
@@ -90,7 +98,7 @@ func HandleAvatarEmbedReply(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Image: &discordgo.MessageEmbedImage{
 			URL: WhoUser.AvatarURL("512"),
 		},
-		Color: 0x79AEA3,
+		Color: 0xDBCDF0,
 	}
 	// s.ChannelMessageSendEmbedReply(
 	// 	m.ChannelID,

@@ -9,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/charmbracelet/log"
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v3"
 )
 
@@ -26,11 +27,52 @@ func GenerateColorHex(uid string) int {
 	input := fmt.Sprintf("%s-%d", uid, salt)
 	hash := sha256.Sum256([]byte(input))
 
-	r := hash[0]
-	g := hash[1]
-	b := hash[2]
+	h := float64(hash[0]) / 255.0
+	s := 0.70 + (float64(hash[1])/255.0)*0.25
+	l := 0.80 + (float64(hash[2])/255.0)*0.10
 
-	return int((r << 16) | (g << 8) | b)
+	var r, g, b float64
+
+	if s == 0 {
+		r, g, b = l, l, l
+	} else {
+		var q float64
+		if l < 0.5 {
+			q = l * (1 + s)
+		} else {
+			q = l + s - l*s
+		}
+		p := 2*l - q
+
+		hueToRGB := func(p, q, t float64) float64 {
+			if t < 0 {
+				t += 1
+			}
+			if t > 1 {
+				t -= 1
+			}
+			if t < 1.0/6.0 {
+				return p + (q-p)*6*t
+			}
+			if t < 1.0/2.0 {
+				return q
+			}
+			if t < 2.0/3.0 {
+				return p + (q-p)*(2.0/3.0-t)*6
+			}
+			return p
+		}
+
+		r = hueToRGB(p, q, h+1.0/3.0)
+		g = hueToRGB(p, q, h)
+		b = hueToRGB(p, q, h-1.0/3.0)
+	}
+
+	red := int((r * 255.0) + 0.5)
+	green := int((g * 255.0) + 0.5)
+	blue := int((b * 255.0) + 0.5)
+
+	return (red << 16) | (green << 8) | blue
 }
 
 func ChanMsgKey(cID string, mID string) ChanMsgKeyType {
@@ -61,7 +103,6 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 	// Reads `config.yaml` and populates BotConfig struct
 	BConfig := BotConfig{}
 	configBytes, err := os.ReadFile(filepath)
-	log.Debug(string(configBytes))
 	if err != nil {
 		log.Warn("Config file not found config.yaml")
 		fl, err := os.Create("config.yaml")
@@ -85,11 +126,12 @@ func ReadConfigFile(filepath string) (BotConfig, error) {
 		return BotConfig{}, err
 
 	}
+	spew.Dump(BConfig)
 	return BConfig, nil
 }
 
 func MessageURL(channelID string, messageID string) string {
-	return "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + channelID + "/" + messageID
+	return "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildID + "/" + channelID + "/" + messageID
 
 }
 

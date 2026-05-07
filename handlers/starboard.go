@@ -40,7 +40,7 @@ func handleStarBoardStuff(s *discordgo.Session, chanMsgType ChanMsgKeyType, todo
 
 func HandleStarBoardAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	// starboard should ignore non added Guilds message reactions
-	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildIDs[0] {
+	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildID {
 		return
 	}
 
@@ -84,14 +84,14 @@ func SendMessageOnKey(c ChanMsgKeyType, s *discordgo.Session, emoji string, coun
 		return
 	}
 
-	msgURL := "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID
+	msgURL := "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildID + "/" + getMessage.ChannelID + "/" + getMessage.ID
 
 	toEmbed := discordgo.MessageEmbed{
 		URL: msgURL,
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    getMessage.Author.GlobalName,
 			IconURL: getMessage.Author.AvatarURL(""),
-			URL:     "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildIDs[0] + "/" + getMessage.ChannelID + "/" + getMessage.ID,
+			URL:     "https://discord.com/channels/" + DiscordBotConfigValues.DiscordConfig.GuildID + "/" + getMessage.ChannelID + "/" + getMessage.ID,
 		},
 		Description: getMessage.Content + "\n\n[Message Link](" + msgURL + ")",
 	}

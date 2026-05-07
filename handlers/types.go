@@ -18,12 +18,16 @@ type SettingsConfig struct {
 
 type DiscordConfig struct {
 	CommandPrefix             string      `yaml:"cmd_prefix"`
-	GuildIDs                  []string    `yaml:"guildIDs"`
+	GuildID                   string      `yaml:"guildID"`
 	Auth                      AuthConfig  `yaml:"auth"`
-	Channels                  []string    `yaml:"threads-filtered"`
+	Channels                  []string    `yaml:"threads"`
 	AllowedURLPrefix          []string    `yaml:"allowed-urls-threads-filtered"`
 	StarBoardChannel          string      `yaml:"starboard-channel"`
+	AnnounceChannel           string      `yaml:"announcement-channel"`
 	ConfessionChannel         string      `yaml:"confession-channel"`
+	ModLogChannel             string      `yaml:"mod-log-channel"`
+	VentChannel               string      `yaml:"vent-channel"`
+	ConfessionCooldown        int         `yaml:"confession-cooldown"`
 	ModChannel                string      `yaml:"mod-channel"`
 	StarBoardFilteredChannels []string    `yaml:"starboard-disabled-channels"`
 	Redis                     RedisConfig `yaml:"redis"`

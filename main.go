@@ -34,8 +34,6 @@ func init() {
 	}
 	handlers.DiscordBotConfigValues = dConVal
 
-	r, _ := InitRedis()
-
 	HandlerList = []handlers.Handler{
 		{
 			Name:     "starboard_handler",
@@ -49,32 +47,8 @@ func init() {
 		},
 		{
 			Name:     "old commands handler",
-			Function: handlers.OnMessageOldCommandHandler,
+			Function: handlers.OnMessageCommandHandler,
 			File:     "miscported.go",
-		},
-		{
-			Name: "cap bg counter",
-			Function: func(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-				handlers.CapBoardHandler(s, m, r)
-			},
-			File: "capboard.go",
-		},
-		{
-			Name: "cap commands",
-			Function: func(s *discordgo.Session, m *discordgo.MessageCreate) {
-				handlers.CapBoardCommandHandler(s, m, r)
-			},
-			File: "capboard.go",
-		},
-		{
-			Name:     "confession handler",
-			Function: handlers.ConfessionMessageHandler,
-			File:     "confession.go",
-		},
-		{
-			Name:     "confession Report handler",
-			Function: handlers.ConfessionVoteDelete,
-			File:     "confession.go",
 		},
 	}
 
@@ -88,7 +62,27 @@ func main() {
 
 	for _, handler := range HandlerList {
 		s.AddHandler(handler.Function)
-		log.Infof("Added Handler : %s", handler.Name)
+		log.Infof("[Old-will-deprecate-calling] Added Handler : %s", handler.Name)
+	}
+
+	for _, handler := range handlers.ImportMemberHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[MemberHandler] Added : %s", handler.Name)
+	}
+
+	for _, handler := range handlers.ImportAdminHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[AdminHandler] Added : %s", handler.Name)
+	}
+
+	for _, handler := range handlers.ImportCapboardHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[Capboard] Added : %s", handler.Name)
+	}
+
+	for _, handler := range handlers.ImportAnonHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[Anon] Added : %s", handler.Name)
 	}
 
 	s.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -101,9 +95,10 @@ func main() {
 			s.ChannelMessageSend(m.ChannelID, mixinList)
 		}
 	})
-	// done := make(chan struct{})
-	// go handlers.PollingServiceToCrossPost(done, s)
-	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAllWithoutPrivileged)
+
+	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	s.State.MaxMessageCount = 500
+	s.StateEnabled = true
 
 	err := s.Open()
 	if err != nil {

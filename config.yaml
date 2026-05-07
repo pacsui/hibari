@@ -1,17 +1,21 @@
-version: "2.0"
+version: "3.0"
 
 discord:
   cmd_prefix: ">>"
-  guildIDs:
-  - "1397965284765077504"
+  guildID: "1397965284765077504"
 
   starboard-channel: "1423710458606780599"
   # starboard-channel: "1416394927310635058"
 
-  confession-channel: "1448718547198021673"
-  # confession-channel: "1416394927310635058" # TEST
-
+  # confession-channel: "1448718547198021673"
+  confession-channel: "1416394927310635058" # TEST
+  vent-channel: "1399656804455157906" 
+  confession-cooldown: 10
+  mod-log-channel: "1397965285851529296"
+  # mod-channel: "1416394927310635058"
   mod-channel: "1416394927310635058"
+
+  announcement-channel: "1416394927310635058" #TEST
 
   starboard-disabled-channels:
   - "1399658766403899454"
@@ -35,16 +39,16 @@ discord:
   - beep boop!
   - ohayouuuu!
 
-threads-filtered:
-  - "1399658766403899454"
-  - "1399435019847602341"
-  - "1444035347695665243"
+  threads:
+    - "1399658766403899454"
+    - "1399435019847602341"
+    - "1444035347695665243"
 
-allowed-urls-threads-filtered:
-  - 'https://instagram.com'
-  - 'https://youtube.com'
-  - 'https://youtu.be'
-  - 'https://tumblr.com'
+  allowed-urls-threads-filtered:
+    - 'https://instagram.com'
+    - 'https://youtube.com'
+    - 'https://youtu.be'
+    - 'https://tumblr.com'
 
 settings:
   star:

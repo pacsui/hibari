@@ -1,6 +1,9 @@
 include .env
 export
 
+sync-capboard:
+	go run ./tools/capboard-sync.go
+
 build: clean
 	go build -o ./bin/hibari
 

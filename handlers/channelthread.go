@@ -29,6 +29,7 @@ func CreateThreadForMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 func CheckChannelIDMatches(chanID string) bool {
 	matches := 0
 	for _, channel := range DiscordBotConfigValues.Channels {
+		log.Debugf("%s -- %s", chanID, channel)
 		if channel == chanID {
 			log.Debugf("Channel Matched : %s", chanID)
 			matches += 1
@@ -38,11 +39,15 @@ func CheckChannelIDMatches(chanID string) bool {
 }
 
 func HandleMessageInChannelPool(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.GuildID != DiscordBotConfigValues.DiscordConfig.GuildID {
+		return
+	}
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	if !CheckChannelIDMatches(m.ChannelID) {
+		log.Debugf("%s - is not in ChannelPool", m.ChannelID)
 		return
 	}
 
