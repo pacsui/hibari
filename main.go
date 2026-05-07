@@ -60,30 +60,30 @@ func main() {
 		log.Infof("Bot running as %s", s.State.User.DisplayName())
 	})
 
-	// for _, handler := range HandlerList {
-	// 	s.AddHandler(handler.Function)
-	// 	log.Infof("[Old-will-deprecate-calling] Added Handler : %s", handler.Name)
-	// }
+	for _, handler := range HandlerList {
+		s.AddHandler(handler.Function)
+		log.Infof("[Old-will-deprecate-calling] Added Handler : %s", handler.Name)
+	}
 
 	for _, handler := range handlers.ImportMemberHandlers() {
 		s.AddHandler(handler.Function)
 		log.Infof("[MemberHandler] Added : %s", handler.Name)
 	}
 
-	// for _, handler := range handlers.ImportAdminHandlers() {
-	// 	s.AddHandler(handler.Function)
-	// 	log.Infof("[AdminHandler] Added : %s", handler.Name)
-	// }
+	for _, handler := range handlers.ImportAdminHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[AdminHandler] Added : %s", handler.Name)
+	}
 
-	// for _, handler := range handlers.ImportCapboardHandlers() {
-	// 	s.AddHandler(handler.Function)
-	// 	log.Infof("[Capboard] Added : %s", handler.Name)
-	// }
+	for _, handler := range handlers.ImportCapboardHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[Capboard] Added : %s", handler.Name)
+	}
 
-	// for _, handler := range handlers.ImportAnonHandlers() {
-	// 	s.AddHandler(handler.Function)
-	// 	log.Infof("[Anon] Added : %s", handler.Name)
-	// }
+	for _, handler := range handlers.ImportAnonHandlers() {
+		s.AddHandler(handler.Function)
+		log.Infof("[Anon] Added : %s", handler.Name)
+	}
 
 	s.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if strings.HasPrefix(m.Content, handlers.C("mixins")) {
@@ -95,6 +95,7 @@ func main() {
 			s.ChannelMessageSend(m.ChannelID, mixinList)
 		}
 	})
+
 	s.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
 	s.State.MaxMessageCount = 500
 	s.StateEnabled = true

@@ -58,7 +58,7 @@ func OnMessageDelete(s *discordgo.Session, m *discordgo.MessageDelete) {
 }
 
 func OnMessageEdit(s *discordgo.Session, m *discordgo.MessageUpdate) {
-	if m.Author.ID == s.State.User.ID || (strings.Contains(m.Content, "gif") && strings.Contains(m.Content, "https")) {
+	if m.Author.ID == s.State.User.ID || m.Author.Bot || (strings.Contains(m.Content, "gif") && strings.Contains(m.Content, "https")) {
 		return
 	}
 	dmp := diffmatchpatch.New()
@@ -67,7 +67,7 @@ func OnMessageEdit(s *discordgo.Session, m *discordgo.MessageUpdate) {
 		return
 	}
 	diffs := dmp.DiffMain(m.BeforeUpdate.Content, m.Content, false)
-	s.ChannelMessageSend(DiscordBotConfigValues.ModLogChannel, fmt.Sprintf("%s\n> edited - %s [Link](https://discord.com/channels/%s/%s/%s)", buildAnsiDiff(diffs), m.Author.Mention(), m.GuildID, m.ChannelID, m.ID))
+	s.ChannelMessageSend(DiscordBotConfigValues.ModLogChannel, fmt.Sprintf("%s> edited - %s [Go to](https://discord.com/channels/%s/%s/%s)", buildAnsiDiff(diffs), m.Author.Mention(), m.GuildID, m.ChannelID, m.ID))
 }
 
 func buildAnsiDiff(diffs []diffmatchpatch.Diff) string {
@@ -84,7 +84,6 @@ func buildAnsiDiff(diffs []diffmatchpatch.Diff) string {
 			sb.WriteString(d.Text)
 		}
 	}
-
 	sb.WriteString("\n```")
 	return sb.String()
 }

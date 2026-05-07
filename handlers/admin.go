@@ -75,5 +75,13 @@ func handleSend(s *discordgo.Session, m *discordgo.MessageCreate, a string) {
 }
 
 func handlePurge(s *discordgo.Session, m *discordgo.MessageCreate, channelID string, count int) {
+	// if count == 0 {
+	// 	count = 50
+	// }
+	// list, err := s.ChannelMessages(channelID, count, "", "", m.ID)
+	// if err != nil {
+	// 	log.Warnf("unable to fetch messages : %s", err.Error())
+	// }
+	// go s.ChannelMessagesBulkDelete(m.ChannelID, list)
 	log.Warn("not impl")
 }
